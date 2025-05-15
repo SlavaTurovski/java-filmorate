@@ -13,7 +13,6 @@ import java.util.Map;
 @Slf4j
 @RestController
 @RequestMapping("/users")
-
 public class UserController {
     private final Map<Long, User> users = new HashMap<>();
 
@@ -60,14 +59,10 @@ public class UserController {
             log.info("У пользователя с логином [{}] отсутствует имя. Логин будет использован как имя", updatedUser.getLogin());
         }
 
-        User oldUser = users.get(updatedUser.getId());
-        oldUser.setEmail(updatedUser.getEmail());
-        oldUser.setLogin(updatedUser.getLogin());
-        oldUser.setName(updatedUser.getName());
-        oldUser.setBirthday(updatedUser.getBirthday());
+        users.put(updatedUser.getId(), updatedUser);
         log.info("Пользователь с id [{}] обновлён", updatedUser.getId());
         log.debug("Пользователь [{}]", updatedUser);
-        return oldUser;
+        return updatedUser;
     }
 
     private long getNextId() {

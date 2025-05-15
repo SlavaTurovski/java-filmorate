@@ -45,14 +45,16 @@ public class FilmController {
             log.warn("Фильм с id [{}] не найден", updatedFilm.getId());
             throw new ValidationException("Фильм с id [" + updatedFilm.getId() + "] не найден");
         }
-        Film oldFilm = films.get(updatedFilm.getId());
-        oldFilm.setName(updatedFilm.getName());
-        oldFilm.setDescription(updatedFilm.getDescription());
-        oldFilm.setReleaseDate(updatedFilm.getReleaseDate());
-        oldFilm.setDuration(updatedFilm.getDuration());
-        log.info("Фильм с id [{}] обновлён", oldFilm.getId());
-        log.debug("Фильм [{}]", oldFilm);
-        return oldFilm;
+
+        if (updatedFilm.getReleaseDate().isBefore(realiseDate)) {
+            log.warn("Дата фильма указана ранее минимальной");
+            throw new ValidationException("Введены неверные данные о фильме");
+        }
+
+        films.put(updatedFilm.getId(), updatedFilm);
+        log.info("Фильм с id [{}] обновлён", updatedFilm.getId());
+        log.debug("Фильм [{}]", updatedFilm);
+        return updatedFilm;
     }
 
     private long getNextId() {
