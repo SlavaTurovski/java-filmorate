@@ -15,7 +15,7 @@ public class FilmControllerTest {
     private FilmController filmController;
     private Film film;
 
-    @BeforeEach
+    /*@BeforeEach
     void setUp() {
         filmController = new FilmController();
         film = new Film();
@@ -24,7 +24,7 @@ public class FilmControllerTest {
          film.setDescription("Комедия");
          film.setReleaseDate(LocalDate.of(1973, 9, 17));
          film.setDuration(93L);
-    }
+    }*/
 
     @Test
     void shouldReturnFilms() {

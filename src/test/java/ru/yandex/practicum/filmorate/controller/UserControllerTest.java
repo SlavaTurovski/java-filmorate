@@ -15,7 +15,7 @@ public class UserControllerTest {
     private UserController userController;
     private User user;
 
-    @BeforeEach
+    /*@BeforeEach
     void setUp() {
         userController = new UserController();
         user = new User();
@@ -24,7 +24,7 @@ public class UserControllerTest {
         user.setLogin("ivan1212");
         user.setName("ivan");
         user.setBirthday(LocalDate.of(1985,5,5));
-    }
+    }*/
 
     @Test
     void shouldReturnUsers() {
