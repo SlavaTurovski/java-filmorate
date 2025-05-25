@@ -4,9 +4,8 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class InMemoryUserStorage implements UserStorage {
@@ -60,6 +59,20 @@ public class InMemoryUserStorage implements UserStorage {
         //log.info("Пользователь с id [{}] обновлён", updatedUser.getId());
         //log.debug("Пользователь [{}]", updatedUser);
         return updatedUser;
+    }
+
+    @Override
+    public Optional<User> getUserById(Long id) {
+        return Optional.ofNullable(users.get(id));
+    }
+
+    @Override
+    public List<User> getFriends(Long id) {
+        User user = users.get(id);
+        return user.getFriends().stream()
+                .map(users::get)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
 
     private long getNextId() {
