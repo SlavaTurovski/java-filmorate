@@ -1,55 +1,64 @@
 package ru.yandex.practicum.filmorate.storage.filmstorage;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.time.LocalDate;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
+@Slf4j
 @Component
 public class InMemoryFilmStorage implements FilmStorage {
 
     private final Map<Long, Film> films = new HashMap<>();
     private final LocalDate realiseDate = LocalDate.of(1895, 12, 28);
 
-   @Override
-   public Collection<Film> getFilms() {
+    @Override
+    public Collection<Film> getFilms() {
+        log.info("Получение списка фильмов");
         return films.values();
     }
 
     @Override
+    public Optional<Film> getFilmById(Long id) {
+        log.info("Получение фильма по id");
+        return films.values().stream()
+                .filter(film -> film.getId().equals(id))
+                .findFirst();
+    }
+
+    @Override
     public Film createFilm(Film newFilm) {
-        //log.info("Добавление фильма [{}]", newFilm.getName());
+        log.info("Добавление фильма [{}]", newFilm.getName());
         if (newFilm.getReleaseDate().isBefore(realiseDate)) {
-            //log.warn("Дата фильма указана ранее минимальной. Фильм не создан");
+            log.warn("Дата фильма указана ранее минимальной. Фильм не создан");
             throw new ValidationException("Введены неверные данные о фильме");
         }
         newFilm.setId(getNextId());
         films.put(newFilm.getId(), newFilm);
-        //log.info("Фильм [{}] добавлен, присвоен id [{}]", newFilm.getName(), newFilm.getId());
-        //log.debug("Фильм [{}]", newFilm);
+        log.info("Фильм [{}] добавлен, присвоен id [{}]", newFilm.getName(), newFilm.getId());
+        log.debug("Фильм [{}]", newFilm);
         return newFilm;
     }
 
     @Override
     public Film updateFilm(Film updatedFilm) {
-        //log.info("Обновление фильма с id [{}]", updatedFilm.getId());
+        log.info("Обновление фильма с id [{}]", updatedFilm.getId());
         if (!films.containsKey(updatedFilm.getId())) {
-            //log.warn("Фильм с id [{}] не найден", updatedFilm.getId());
+            log.warn("Фильм с id [{}] не найден", updatedFilm.getId());
             throw new ValidationException("Фильм с id [" + updatedFilm.getId() + "] не найден");
         }
 
         if (updatedFilm.getReleaseDate().isBefore(realiseDate)) {
-            //log.warn("Дата фильма указана ранее минимальной");
+            log.warn("Дата фильма указана ранее минимальной");
             throw new ValidationException("Введены неверные данные о фильме");
         }
 
         films.put(updatedFilm.getId(), updatedFilm);
-        //log.info("Фильм с id [{}] обновлён", updatedFilm.getId());
-        //log.debug("Фильм [{}]", updatedFilm);
+        log.info("Фильм с id [{}] обновлён", updatedFilm.getId());
+        log.debug("Фильм [{}]", updatedFilm);
         return updatedFilm;
     }
 
