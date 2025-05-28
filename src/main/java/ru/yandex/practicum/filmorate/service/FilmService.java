@@ -48,13 +48,13 @@ public class FilmService {
         return filmStorage.updateFilm(film);
     }
 
-    public void addLike(Long userId, Long filmId) {
+    public void addLike(Long filmId, Long userId) {
         Film film = getFilmById(filmId);
         User user = userService.getUserById(userId);
         film.getLikes().add(user.getId());
     }
 
-    public void removeLike(Long userId, Long filmId) {
+    public void removeLike(Long filmId, Long userId) {
         Film film = getFilmById(filmId);
         if (userService.getUserById(userId) != null) {
             film.getLikes().remove(userId);
