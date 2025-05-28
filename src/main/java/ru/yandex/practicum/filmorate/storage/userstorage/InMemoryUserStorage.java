@@ -43,7 +43,6 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User updateUser(User updatedUser) {
-
         if (updatedUser.getId() == null) {
             throw new ValidationException("Для обновления пользователя необходимо указать id");
         }
@@ -52,28 +51,6 @@ public class InMemoryUserStorage implements UserStorage {
             return updatedUser;
         }
         throw new NotFoundException(String.format("Пользователь с id = %d  - не найден", updatedUser.getId()));
-
-
-        /*log.info("Обновление пользователя с id [{}]", updatedUser);
-        if (!users.containsKey(updatedUser.getId())) {
-            log.warn("Пользователь с id [{}] не найден", updatedUser.getId());
-            throw new NotFoundException("Пользователь с id [" + updatedUser.getId() + "] не найден");
-        }
-
-        if (updatedUser.getLogin().contains(" ")) {
-            log.info("Логин [{}] содержит пробелы. Пользователь не обновлён", updatedUser.getLogin());
-            throw new ValidationException("Логин содержит пробелы");
-        }
-
-        if (updatedUser.getName().isBlank()) {
-            updatedUser.setName(updatedUser.getLogin());
-            log.info("У пользователя с логином [{}] отсутствует имя. Логин будет использован как имя", updatedUser.getLogin());
-        }
-
-        users.put(updatedUser.getId(), updatedUser);
-        log.info("Пользователь с id [{}] обновлён", updatedUser.getId());
-        log.debug("Пользователь [{}]", updatedUser);
-        return updatedUser;*/
     }
 
     @Override

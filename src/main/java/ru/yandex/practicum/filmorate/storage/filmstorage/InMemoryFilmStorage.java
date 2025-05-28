@@ -44,22 +44,6 @@ public class InMemoryFilmStorage implements FilmStorage {
 
 
     }
-        /*log.info("Обновление фильма с id [{}]", updatedFilm.getId());
-        if (!films.containsKey(updatedFilm.getId())) {
-            log.warn("Фильм с id [{}] не найден", updatedFilm.getId());
-            throw new ValidationException("Фильм с id [" + updatedFilm.getId() + "] не найден");
-        }
-
-        if (updatedFilm.getReleaseDate().isBefore(realiseDate)) {
-            log.warn("Дата фильма указана ранее минимальной");
-            throw new ValidationException("Введены неверные данные о фильме");
-        }
-
-        films.put(updatedFilm.getId(), updatedFilm);
-        log.info("Фильм с id [{}] обновлён", updatedFilm.getId());
-        log.debug("Фильм [{}]", updatedFilm);
-        return updatedFilm;
-    }*/
 
     @Override
     public Film getFilmById(Long filmId) {

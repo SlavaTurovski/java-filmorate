@@ -18,8 +18,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class FilmService {
 
-   private final FilmStorage filmStorage;
-   private final UserService userService;
+    private final FilmStorage filmStorage;
+    private final UserService userService;
 
     public List<Film> getFilms() {
         return filmStorage.getFilms();
@@ -63,12 +63,11 @@ public class FilmService {
 
     public List<Film> getMostPopularFilms(Integer count) {
         List<Film> films = filmStorage.getFilms();
-
         return films.stream()
                 .filter(film -> film.getLikes() != null && !film.getLikes().isEmpty())
                 .sorted((film1, film2) ->
                         Integer.compare((film2.getLikes() != null) ? film2.getLikes().size() : 0,
-                                        (film1.getLikes() != null) ? film1.getLikes().size() : 0))
+                                (film1.getLikes() != null) ? film1.getLikes().size() : 0))
                 .limit(count)
                 .collect(Collectors.toList());
     }
