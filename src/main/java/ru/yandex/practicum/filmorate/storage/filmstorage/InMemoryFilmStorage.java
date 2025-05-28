@@ -33,16 +33,17 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public Film updateFilm(Film updatedFilm) {
+        log.info("Обновление фильма с id [{}]", updatedFilm.getId());
         if (updatedFilm.getId() == null) {
             throw new ValidationException("Для обновления фильма необходимо указать id");
         }
         if (films.containsKey(updatedFilm.getId())) {
             films.put(updatedFilm.getId(), updatedFilm);
+            log.info("Фильм с id [{}] обновлен", updatedFilm.getId());
+            log.debug("Фильм [{}]", updatedFilm);
             return updatedFilm;
         }
-        throw new NotFoundException(String.format("Фильм с id = %d  - не найден", updatedFilm.getId()));
-
-
+        throw new NotFoundException("Фильм с id " + updatedFilm.getId()  + " не найден");
     }
 
     @Override

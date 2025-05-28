@@ -24,16 +24,6 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public User createUser(User newUser) {
         log.info("Создание нового пользователя [{}]", newUser);
-        if (newUser.getLogin().contains(" ")) {
-            log.warn("Логин [{}] содержит пробелы. Пользователь не создан", newUser.getLogin());
-            throw new ValidationException("Логин содержит пробелы");
-        }
-
-        if (newUser.getName() == null || newUser.getName().isBlank()) {
-            newUser.setName(newUser.getLogin());
-            log.info("У пользователя с логином [{}] отсутствует имя. Имя присвоено в соответствии с логином", newUser.getLogin());
-        }
-
         newUser.setId(getNextId());
         users.put(newUser.getId(), newUser);
         log.info("Пользователь c логином [{}] успешно создан, присвоен id [{}]", newUser.getLogin(), newUser.getId());
@@ -43,14 +33,17 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User updateUser(User updatedUser) {
+        log.info("Обновление пользователя с id [{}]", updatedUser.getId());
         if (updatedUser.getId() == null) {
             throw new ValidationException("Для обновления пользователя необходимо указать id");
         }
         if (users.containsKey(updatedUser.getId())) {
             users.put(updatedUser.getId(), updatedUser);
+            log.info("Пользователь с id [{}] обновлен", updatedUser.getId());
+            log.debug("Пользователь [{}]", updatedUser);
             return updatedUser;
         }
-        throw new NotFoundException(String.format("Пользователь с id = %d  - не найден", updatedUser.getId()));
+        throw new NotFoundException("Пользователь с id " + updatedUser.getId() + " не найден");
     }
 
     @Override

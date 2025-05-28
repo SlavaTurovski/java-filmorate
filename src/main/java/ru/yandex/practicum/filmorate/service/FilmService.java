@@ -49,12 +49,14 @@ public class FilmService {
     }
 
     public void addLike(Long filmId, Long userId) {
+        log.info("Добавление лайка");
         Film film = getFilmById(filmId);
         User user = userService.getUserById(userId);
         film.getLikes().add(user.getId());
     }
 
     public void removeLike(Long filmId, Long userId) {
+        log.info("Удаление лайка");
         Film film = getFilmById(filmId);
         if (userService.getUserById(userId) != null) {
             film.getLikes().remove(userId);
@@ -62,6 +64,7 @@ public class FilmService {
     }
 
     public List<Film> getMostPopularFilms(Integer count) {
+        log.info("Получение списка популярных фильмов");
         List<Film> films = filmStorage.getFilms();
         return films.stream()
                 .filter(film -> film.getLikes() != null && !film.getLikes().isEmpty())

@@ -33,20 +33,21 @@ public class UserService {
 
     public User createUser(User user) {
         validateUser(user);
-        for (User value : userStorage.getUsers()) {
-            if (user.getEmail().equals(value.getEmail())) {
-                throw new ValidationException("Пользователь с таким email уже существует");
-            }
-        }
         return userStorage.createUser(user);
     }
 
     public User updateUser(User user) {
         validateUser(user);
+        for (User value : userStorage.getUsers()) {
+            if (user.getEmail().equals(value.getEmail())) {
+                throw new ValidationException("Пользователь с таким email уже существует");
+            }
+        }
         return userStorage.updateUser(user);
     }
 
     public void addFriend(Long userId, Long friendId) {
+        log.info("Добавление в друзья");
         if (userId.equals(friendId)) {
             throw new ValidationException("Пользователь с id = " + userId + " не может добавить самого себя в друзья");
         }
@@ -57,6 +58,7 @@ public class UserService {
     }
 
     public void removeFriend(Long userId, Long friendId) {
+        log.info("Удаление из друзей");
         User user = getUserById(userId);
         User friend = getUserById(friendId);
         user.getFriends().remove(friendId);
@@ -64,6 +66,7 @@ public class UserService {
     }
 
     public List<User> getMutualFriendsList(Long userId, Long otherUserId) {
+        log.info("Получение списка общих друзей");
         User user = getUserById(userId);
         User otherUser = getUserById(otherUserId);
         Set<Long> userFriendsId = user.getFriends();
@@ -80,6 +83,7 @@ public class UserService {
     }
 
     public List<User> getFriends(Long userId) {
+        log.info("Получение списка друзей");
         User user = getUserById(userId);
         Set<Long> userFriendsId = user.getFriends();
         return userFriendsId.stream()
@@ -98,7 +102,7 @@ public class UserService {
         if (user.getLogin() == null || user.getLogin().isBlank()) {
             throw new ValidationException("Логин не заполнен");
         }
-        if (user.getLogin().matches(".*\\s.*")) {
+        if (user.getLogin().matches(" ")) {
             throw new ValidationException("Логин не может содержать пробелы");
         }
         if (user.getBirthday() == null) {
@@ -108,8 +112,8 @@ public class UserService {
             throw new ValidationException("Дата рождения не может быть в будущем");
         }
         if (user.getName() == null || user.getName().isBlank()) {
+            log.warn("У пользователя с логином [{}] отсутствует имя. Имя присвоено в соответствии с логином", user.getLogin());
             user.setName(user.getLogin());
-            log.debug("Пустое имя пользователя заменено на логин");
         }
     }
 
