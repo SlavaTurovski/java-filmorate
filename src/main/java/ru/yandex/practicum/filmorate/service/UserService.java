@@ -33,16 +33,16 @@ public class UserService {
 
     public User createUser(User user) {
         validateUser(user);
-        return userStorage.createUser(user);
-    }
-
-    public User updateUser(User user) {
-        validateUser(user);
         for (User value : userStorage.getUsers()) {
             if (user.getEmail().equals(value.getEmail())) {
                 throw new ValidationException("Пользователь с таким email уже существует");
             }
         }
+        return userStorage.createUser(user);
+    }
+
+    public User updateUser(User user) {
+        validateUser(user);
         return userStorage.updateUser(user);
     }
 
