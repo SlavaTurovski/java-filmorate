@@ -4,67 +4,91 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.filmstorage.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.userstorage.UserStorage;
 
-import java.util.Collection;
-import java.util.Comparator;
+import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class FilmService {
 
    private final FilmStorage filmStorage;
-   private final UserStorage userStorage;
+   private final UserService userService;
 
-    public Collection<Film> getFilms() {
+    public List<Film> getFilms() {
         return filmStorage.getFilms();
     }
 
-    public Film createFilm(Film newFilm) {
-        return filmStorage.createFilm(newFilm);
+    public Film getFilmById(Long filmId) {
+        Film film = filmStorage.getFilmById(filmId);
+        if (film == null) {
+            throw new NotFoundException("Фильм с id " + filmId + " не найден!");
+        }
+        return film;
     }
 
-    public Film updateFilm(Film updatedFilm) {
-        return filmStorage.updateFilm(updatedFilm);
+    public Film createFilm(Film film) {
+        validateFilm(film);
+        for (Film value : filmStorage.getFilms()) {
+            if (film.getName().equals(value.getName())) {
+                throw new ValidationException("Фильм с таким названием уже существует");
+            }
+        }
+        return filmStorage.createFilm(film);
     }
 
-    public Optional<Film> getFilmById(Long id) {
-        return filmStorage.getFilmById(id);
+    public Film updateFilm(Film film) {
+        validateFilm(film);
+        return filmStorage.updateFilm(film);
     }
 
     public void addLike(Long userId, Long filmId) {
-        Optional<Film> film1 = filmStorage.getFilmById(filmId);
-        Optional<User> user1 = userStorage.getUserById(userId);
-        if (film1.isEmpty() || user1.isEmpty()) {
-            throw new NotFoundException("не найден");
-        }
-        Film film = film1.get();
-        film.getLikes().add(userId);
+        Film film = getFilmById(filmId);
+        User user = userService.getUserById(userId);
+        film.getLikes().add(user.getId());
     }
 
     public void removeLike(Long userId, Long filmId) {
-        Optional<Film> film1 = filmStorage.getFilmById(filmId);
-        Optional<User> user1 = userStorage.getUserById(userId);
-        if (film1.isEmpty() || user1.isEmpty()) {
-            throw new NotFoundException("Пользователь либо фильм не найден!");
+        Film film = getFilmById(filmId);
+        if (userService.getUserById(userId) != null) {
+            film.getLikes().remove(userId);
         }
-        Film film = film1.get();
-        film.getLikes().remove(userId);
-        throw new NotFoundException("Лайк пользователя не найден!");
     }
 
-    public List<Film> getTopPopularFilms(Integer count) {
-        return filmStorage.getFilms().stream()
-                .sorted(Comparator.comparingInt(film -> film.getLikes().size()))
+    public List<Film> getMostPopularFilms(Integer count) {
+        List<Film> films = filmStorage.getFilms();
+
+        return films.stream()
+                .filter(film -> film.getLikes() != null && !film.getLikes().isEmpty())
+                .sorted((film1, film2) ->
+                        Integer.compare((film2.getLikes() != null) ? film2.getLikes().size() : 0,
+                                        (film1.getLikes() != null) ? film1.getLikes().size() : 0))
                 .limit(count)
                 .collect(Collectors.toList());
+    }
+
+    private void validateFilm(Film film) {
+        if (film.getName() == null || film.getName().isBlank()) {
+            throw new ValidationException("Название фильма не заполнено");
+        }
+        if (film.getDescription() == null || film.getDescription().isBlank()) {
+            throw new ValidationException("Описание фильма не заполнено");
+        }
+        if (film.getDescription().length() >= 200) {
+            throw new ValidationException("Описание фильма не должно превышать 200 символов");
+        }
+        if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
+            throw new ValidationException("Дата релиза не может быть раньше 28 декабря 1895 года");
+        }
+        if (film.getDuration() == null || film.getDuration() <= 0) {
+            throw new ValidationException("Продолжительность фильма должна быть положительным числом");
+        }
     }
 
 }

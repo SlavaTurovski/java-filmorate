@@ -2,8 +2,13 @@ package ru.yandex.practicum.filmorate.controller;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.filmstorage.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.storage.userstorage.InMemoryUserStorage;
 
 import java.time.LocalDate;
 import java.util.Collection;
@@ -13,18 +18,22 @@ import static org.junit.jupiter.api.Assertions.*;
 public class FilmControllerTest {
 
     private FilmController filmController;
+    private UserController userController;
+
     private Film film;
 
-    /*@BeforeEach
+    @BeforeEach
     void setUp() {
-        filmController = new FilmController();
+        UserService userService = new UserService(new InMemoryUserStorage());
+        userController = new UserController(userService);
+        filmController = new FilmController(new FilmService(new InMemoryFilmStorage(), userService));
         film = new Film();
-         film.setId(1L);
-         film.setName("Иван Васильевич меняет профессию");
-         film.setDescription("Комедия");
-         film.setReleaseDate(LocalDate.of(1973, 9, 17));
-         film.setDuration(93L);
-    }*/
+        film.setId(1L);
+        film.setName("Иван Васильевич меняет профессию");
+        film.setDescription("Комедия");
+        film.setReleaseDate(LocalDate.of(1973, 9, 17));
+        film.setDuration(93L);
+    }
 
     @Test
     void shouldReturnFilms() {
@@ -58,8 +67,8 @@ public class FilmControllerTest {
     @Test
     void shouldThrowExceptionWhenUpdateNonExistentId() {
         film.setId(1111L);
-        ValidationException ex = assertThrows(ValidationException.class, () -> filmController.updateFilm(film));
-        assertEquals("Фильм с id [1111] не найден", ex.getMessage());
+        NotFoundException ex = assertThrows(NotFoundException.class, () -> filmController.updateFilm(film));
+        assertEquals("Фильм с id 1111 не найден!", ex.getMessage());
     }
 
 }

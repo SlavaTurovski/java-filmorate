@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.storage.userstorage;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
@@ -14,18 +15,11 @@ public class InMemoryUserStorage implements UserStorage {
     private final Map<Long, User> users = new HashMap<>();
 
     @Override
-    public Collection<User> getUsers() {
+    public List<User> getUsers() {
         log.info("Получение списка пользователей");
-        return users.values();
+        return new ArrayList<>(users.values());
     }
 
-    @Override
-    public Optional<User> getUserById(Long id) {
-        log.info("Поиск пользователя по id");
-        return users.values().stream()
-                .filter(user -> user.getId().equals(id))
-                .findFirst();
-    }
 
     @Override
     public User createUser(User newUser) {
@@ -49,10 +43,21 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User updateUser(User updatedUser) {
-        log.info("Обновление пользователя с id [{}]", updatedUser);
+
+        if (updatedUser.getId() == null) {
+            throw new ValidationException("Для обновления пользователя необходимо указать id");
+        }
+        if (users.containsKey(updatedUser.getId())) {
+            users.put(updatedUser.getId(), updatedUser);
+            return updatedUser;
+        }
+        throw new NotFoundException(String.format("Пользователь с id = %d  - не найден", updatedUser.getId()));
+
+
+        /*log.info("Обновление пользователя с id [{}]", updatedUser);
         if (!users.containsKey(updatedUser.getId())) {
             log.warn("Пользователь с id [{}] не найден", updatedUser.getId());
-            throw new ValidationException("Пользователь с id [" + updatedUser.getId() + "] не найден");
+            throw new NotFoundException("Пользователь с id [" + updatedUser.getId() + "] не найден");
         }
 
         if (updatedUser.getLogin().contains(" ")) {
@@ -68,7 +73,12 @@ public class InMemoryUserStorage implements UserStorage {
         users.put(updatedUser.getId(), updatedUser);
         log.info("Пользователь с id [{}] обновлён", updatedUser.getId());
         log.debug("Пользователь [{}]", updatedUser);
-        return updatedUser;
+        return updatedUser;*/
+    }
+
+    @Override
+    public User getUserById(Long userId) {
+        return users.get(userId);
     }
 
     private long getNextId() {

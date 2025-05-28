@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.storage.filmstorage;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
@@ -13,29 +14,16 @@ import java.util.*;
 public class InMemoryFilmStorage implements FilmStorage {
 
     private final Map<Long, Film> films = new HashMap<>();
-    private final LocalDate realiseDate = LocalDate.of(1895, 12, 28);
 
     @Override
-    public Collection<Film> getFilms() {
+    public List<Film> getFilms() {
         log.info("Получение списка фильмов");
-        return films.values();
-    }
-
-    @Override
-    public Optional<Film> getFilmById(Long id) {
-        log.info("Получение фильма по id");
-        return films.values().stream()
-                .filter(film -> film.getId().equals(id))
-                .findFirst();
+        return new ArrayList<>(films.values());
     }
 
     @Override
     public Film createFilm(Film newFilm) {
         log.info("Добавление фильма [{}]", newFilm.getName());
-        if (newFilm.getReleaseDate().isBefore(realiseDate)) {
-            log.warn("Дата фильма указана ранее минимальной. Фильм не создан");
-            throw new ValidationException("Введены неверные данные о фильме");
-        }
         newFilm.setId(getNextId());
         films.put(newFilm.getId(), newFilm);
         log.info("Фильм [{}] добавлен, присвоен id [{}]", newFilm.getName(), newFilm.getId());
@@ -45,7 +33,18 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public Film updateFilm(Film updatedFilm) {
-        log.info("Обновление фильма с id [{}]", updatedFilm.getId());
+        if (updatedFilm.getId() == null) {
+            throw new ValidationException("Для обновления фильма необходимо указать id");
+        }
+        if (films.containsKey(updatedFilm.getId())) {
+            films.put(updatedFilm.getId(), updatedFilm);
+            return updatedFilm;
+        }
+        throw new NotFoundException(String.format("Фильм с id = %d  - не найден", updatedFilm.getId()));
+
+
+    }
+        /*log.info("Обновление фильма с id [{}]", updatedFilm.getId());
         if (!films.containsKey(updatedFilm.getId())) {
             log.warn("Фильм с id [{}] не найден", updatedFilm.getId());
             throw new ValidationException("Фильм с id [" + updatedFilm.getId() + "] не найден");
@@ -60,6 +59,11 @@ public class InMemoryFilmStorage implements FilmStorage {
         log.info("Фильм с id [{}] обновлён", updatedFilm.getId());
         log.debug("Фильм [{}]", updatedFilm);
         return updatedFilm;
+    }*/
+
+    @Override
+    public Film getFilmById(Long filmId) {
+        return films.get(filmId);
     }
 
     private long getNextId() {
