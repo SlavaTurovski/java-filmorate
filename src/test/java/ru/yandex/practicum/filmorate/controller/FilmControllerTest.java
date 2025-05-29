@@ -5,13 +5,14 @@ import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.storage.filmstorage.InMemoryFilmStorage;
 import ru.yandex.practicum.filmorate.storage.userstorage.InMemoryUserStorage;
 
 import java.time.LocalDate;
-import java.util.Collection;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -20,38 +21,63 @@ public class FilmControllerTest {
     private FilmController filmController;
     private UserController userController;
 
-    private Film film;
+    private Film film1;
+    private Film film2;
+    private Film film3;
+    private User user1;
 
     @BeforeEach
     void setUp() {
         UserService userService = new UserService(new InMemoryUserStorage());
         userController = new UserController(userService);
         filmController = new FilmController(new FilmService(new InMemoryFilmStorage(), userService));
-        film = new Film();
-        film.setId(1L);
-        film.setName("Иван Васильевич меняет профессию");
-        film.setDescription("Комедия");
-        film.setReleaseDate(LocalDate.of(1973, 9, 17));
-        film.setDuration(93L);
+
+        film1 = new Film();
+        film1.setId(1L);
+        film1.setName("Иван Васильевич меняет профессию");
+        film1.setDescription("Комедия комедийная");
+        film1.setReleaseDate(LocalDate.of(1973, 9, 17));
+        film1.setDuration(93L);
+
+        film2 = new Film();
+        film2.setId(2L);
+        film2.setName("Пила");
+        film2.setDescription("Ужас ужасный");
+        film2.setReleaseDate(LocalDate.of(2004, 12, 16));
+        film2.setDuration(103L);
+
+        film3 = new Film();
+        film3.setId(3L);
+        film3.setName("Интерстеллар");
+        film3.setDescription("Фантастика научная");
+        film3.setReleaseDate(LocalDate.of(2014, 11, 6));
+        film3.setDuration(169L);
+
+        user1 = new User();
+        user1.setId(1L);
+        user1.setEmail("nastya@gmail.com");
+        user1.setLogin("Anastasiya");
+        user1.setName("Anastasiya Kulagina");
+        user1.setBirthday(LocalDate.of(1999,12,12));
     }
 
     @Test
     void shouldReturnFilms() {
-        filmController.createFilm(film);
-        Collection<Film> films = filmController.getFilms();
+        filmController.createFilm(film1);
+        List<Film> films = filmController.getFilms();
         assertEquals(1, films.size());
     }
 
     @Test
     void shouldCreateFilm() {
-        Film added = filmController.createFilm(film);
+        Film added = filmController.createFilm(film1);
         assertNotNull(added.getId());
         assertEquals("Иван Васильевич меняет профессию", added.getName());
     }
 
     @Test
     void shouldUpdateFilm() {
-        Film added = filmController.createFilm(film);
+        Film added = filmController.createFilm(film1);
         added.setName("Маска");
         Film updated = filmController.updateFilm(added);
         assertEquals("Маска", updated.getName());
@@ -59,16 +85,47 @@ public class FilmControllerTest {
 
     @Test
     void shouldThrowExceptionForWrongDate() {
-        film.setReleaseDate(LocalDate.of(1111, 1, 1));
-        ValidationException ex = assertThrows(ValidationException.class, () -> filmController.createFilm(film));
-        assertEquals("Введены неверные данные о фильме", ex.getMessage());
+        film1.setReleaseDate(LocalDate.of(1111, 1, 1));
+        ValidationException ex = assertThrows(ValidationException.class, () -> filmController.createFilm(film1));
+        assertEquals("Дата релиза не может быть раньше 28 декабря 1895 года", ex.getMessage());
     }
 
     @Test
     void shouldThrowExceptionWhenUpdateNonExistentId() {
-        film.setId(1111L);
-        NotFoundException ex = assertThrows(NotFoundException.class, () -> filmController.updateFilm(film));
-        assertEquals("Фильм с id 1111 не найден!", ex.getMessage());
+        film1.setId(1111L);
+        NotFoundException ex = assertThrows(NotFoundException.class, () -> filmController.updateFilm(film1));
+        assertEquals("Фильм с id 1111 не найден", ex.getMessage());
+    }
+
+    @Test
+    void shouldAddLikesToFilm() {
+        filmController.createFilm(film1);
+        userController.createUser(user1);
+        filmController.addLike(1L, 1L);
+        assertEquals(1, film1.getLikes().size());
+    }
+
+    @Test
+    void shouldRemoveLikesFromFilm() {
+        filmController.createFilm(film1);
+        userController.createUser(user1);
+        filmController.removeLike(1L, 1L);
+        assertEquals(0, film1.getLikes().size());
+    }
+
+    @Test
+    void shouldGetMostPopularFilms() {
+        filmController.createFilm(film1);
+        filmController.createFilm(film2);
+        filmController.createFilm(film3);
+        userController.createUser(user1);
+        filmController.addLike(1L, 1L);
+        filmController.addLike(2L, 1L);
+        filmController.addLike(3L, 1L);
+        filmController.getMostPopularFilms(10);
+        assertEquals(3, filmController.getMostPopularFilms(10).size());
+        filmController.removeLike(3L, 1L);
+        assertEquals(2, filmController.getMostPopularFilms(10).size());
     }
 
 }
