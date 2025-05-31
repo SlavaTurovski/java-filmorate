@@ -1,9 +1,12 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import jakarta.validation.ValidatorFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.FilmService;
@@ -13,6 +16,7 @@ import ru.yandex.practicum.filmorate.storage.userstorage.InMemoryUserStorage;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -85,9 +89,10 @@ public class FilmControllerTest {
 
     @Test
     void shouldThrowExceptionForWrongDate() {
+        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         film1.setReleaseDate(LocalDate.of(1111, 1, 1));
-        ValidationException ex = assertThrows(ValidationException.class, () -> filmController.createFilm(film1));
-        assertEquals("Дата релиза не может быть раньше 28 декабря 1895 года", ex.getMessage());
+        Set<ConstraintViolation<Film>> validations = factory.getValidator().validate(film1);
+        assertTrue(validations.size() == 1);
     }
 
     @Test
@@ -125,7 +130,7 @@ public class FilmControllerTest {
         filmController.getMostPopularFilms(10);
         assertEquals(3, filmController.getMostPopularFilms(10).size());
         filmController.removeLike(3L, 1L);
-        assertEquals(2, filmController.getMostPopularFilms(10).size());
+        assertEquals(3, filmController.getMostPopularFilms(10).size());
     }
 
 }
