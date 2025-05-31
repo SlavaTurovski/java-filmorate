@@ -20,12 +20,15 @@ public class InMemoryUserStorage implements UserStorage {
         return new ArrayList<>(users.values());
     }
 
-
     @Override
     public User createUser(User newUser) {
         log.info("Создание нового пользователя [{}]", newUser);
         newUser.setId(getNextId());
-        users.put(newUser.getId(), newUser);
+        if (newUser.getName() == null || newUser.getName().isBlank()) {
+            log.warn("У пользователя с логином [{}] отсутствует имя. Имя присвоено в соответствии с логином", newUser.getLogin());
+            newUser.setName(newUser.getLogin());
+        }
+            users.put(newUser.getId(), newUser);
         log.info("Пользователь c логином [{}] успешно создан, присвоен id [{}]", newUser.getLogin(), newUser.getId());
         log.debug("Пользователь [{}]", newUser);
         return newUser;

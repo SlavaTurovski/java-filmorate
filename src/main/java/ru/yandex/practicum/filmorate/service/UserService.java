@@ -8,7 +8,6 @@ import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.userstorage.UserStorage;
 
-import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -18,6 +17,8 @@ import java.util.stream.Collectors;
 public class UserService {
 
     private final UserStorage userStorage;
+
+    private final Set<String> emails = new HashSet<>();
 
     public List<User> getUsers() {
         return userStorage.getUsers();
@@ -32,17 +33,13 @@ public class UserService {
     }
 
     public User createUser(User user) {
-        validateUser(user);
-        for (User value : userStorage.getUsers()) {
-            if (user.getEmail().equals(value.getEmail())) {
-                throw new ValidationException("Пользователь с таким email уже существует");
-            }
+        if (!emails.add(user.getEmail())) {
+            throw new ValidationException("Пользователь с таким email уже существует");
         }
         return userStorage.createUser(user);
     }
 
     public User updateUser(User user) {
-        validateUser(user);
         return userStorage.updateUser(user);
     }
 
@@ -70,13 +67,8 @@ public class UserService {
         User user = getUserById(userId);
         User otherUser = getUserById(otherUserId);
         Set<Long> userFriendsId = user.getFriends();
-        Set<Long> otherUserFriendsId = otherUser.getFriends();
-        Set<Long> commonFriendsId = new HashSet<>(userFriendsId);
-        commonFriendsId.retainAll(otherUserFriendsId);
-        if (userFriendsId.isEmpty()) {
-            throw new NotFoundException(String.format("У пользователей с id = " + userId + " и " + otherUserId + " нет общих друзей"));
-        }
-        return commonFriendsId.stream()
+        return userFriendsId.stream()
+                .filter(friendId -> otherUser.getFriends().contains(friendId))
                 .map(userStorage::getUserById)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
@@ -88,33 +80,7 @@ public class UserService {
         Set<Long> userFriendsId = user.getFriends();
         return userFriendsId.stream()
                 .map(userStorage::getUserById)
-                .filter(Objects::nonNull)
                 .collect(Collectors.toList());
-    }
-
-    private void validateUser(User user) {
-        if (user.getEmail() == null || user.getEmail().isBlank()) {
-            throw new ValidationException("Электронная почта не заполнена");
-        }
-        if (!user.getEmail().matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
-            throw new ValidationException("Электронная почта введена некорректно");
-        }
-        if (user.getLogin() == null || user.getLogin().isBlank()) {
-            throw new ValidationException("Логин не заполнен");
-        }
-        if (user.getLogin().matches(" ")) {
-            throw new ValidationException("Логин не может содержать пробелы");
-        }
-        if (user.getBirthday() == null) {
-            throw new ValidationException("Дата рождения не заполнена");
-        }
-        if (user.getBirthday().isAfter(LocalDate.now())) {
-            throw new ValidationException("Дата рождения не может быть в будущем");
-        }
-        if (user.getName() == null || user.getName().isBlank()) {
-            log.warn("У пользователя с логином [{}] отсутствует имя. Имя присвоено в соответствии с логином", user.getLogin());
-            user.setName(user.getLogin());
-        }
     }
 
 }
