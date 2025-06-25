@@ -2,7 +2,7 @@
 Filmorate - учебный проект социальной платформы о кино. Пользователи могут просматривать информацию и фильмах, добавлять других пользователей в друзья и составлять рейтинги фильмов.
 
 ## ER-диаграмма
-![ER-диаграмма учебного проекта Filmorate]()
+![ER-диаграмма учебного проекта Filmorate](https://github.com/SlavaTurovski/java-filmorate/blob/add-database/src/main/resources/Diagram.png)
 
 Ссылка на диаграмму
 https://dbdiagram.io/d/Copy-of-Untitled-Diagram-685bf94cf413ba3508d4fb38
