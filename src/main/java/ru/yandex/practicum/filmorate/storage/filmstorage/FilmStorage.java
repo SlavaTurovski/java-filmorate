@@ -1,17 +1,22 @@
 package ru.yandex.practicum.filmorate.storage.filmstorage;
 
+import ru.yandex.practicum.filmorate.exception.InternalServerException;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
-import java.util.List;
+import java.util.Collection;
+import java.util.Optional;
 
 public interface FilmStorage {
 
-    List<Film> getFilms();
+    Collection<Film> getFilms();
 
-    Film createFilm(Film newFilm);
+    Film createFilm(Film newFilm) throws ValidationException;
 
-    Film updateFilm(Film updatedFilm);
+    Film updateFilm(Film updatedFilm) throws ValidationException;
 
-    Film getFilmById(Long filmId);
+    Optional<Film> getFilmById(Long filmId) throws ValidationException;
+
+    Collection<Film> getTopFilms(int limit) throws InternalServerException;
 
 }

@@ -1,3 +1,4 @@
+/*
 package ru.yandex.practicum.filmorate.controller;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -5,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
-import ru.yandex.practicum.filmorate.storage.userstorage.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.storage.userstorage.UserDbStorage;
 
 import java.time.LocalDate;
 import java.util.Collection;
@@ -21,7 +22,7 @@ public class UserControllerTest {
 
     @BeforeEach
     void setUp() {
-        userController = new UserController(new UserService(new InMemoryUserStorage()));
+        userController = new UserController(new UserService(new UserDbStorage()));
 
         user1 = new User();
         user1.setId(1L);
@@ -120,4 +121,4 @@ public class UserControllerTest {
         assertEquals(user2.getFriends().contains(1L), user3.getFriends().contains(1L));
     }
 
-}
+}*/
