@@ -31,7 +31,7 @@ public class FilmService {
     public Film getFilmById(Long filmId) {
         log.info("Поиск фильма по id");
         return filmStorage.getFilmById(filmId)
-                .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "Фильм не найден!"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Фильм не найден!"));
     }
 
     public Film createFilm(Film newFilm) {
