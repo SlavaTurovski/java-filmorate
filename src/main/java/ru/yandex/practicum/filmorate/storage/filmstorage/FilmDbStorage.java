@@ -19,7 +19,6 @@ import ru.yandex.practicum.filmorate.storage.mappers.GenreRowMapper;
 import java.sql.PreparedStatement;
 import java.sql.Types;
 import java.sql.Date;
-import java.time.LocalDate;
 import java.util.*;
 
 @Slf4j

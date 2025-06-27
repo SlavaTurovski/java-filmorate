@@ -15,7 +15,6 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.mappers.UserRowMapper;
 import java.sql.PreparedStatement;
 import java.sql.Date;
-import java.time.LocalDate;
 import java.util.*;
 
 @Slf4j
