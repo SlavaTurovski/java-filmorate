@@ -90,22 +90,6 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public Film createFilm(Film film) {
         log.info("Добавление фильма [{}]", film.getName());
-        if (film.getName() == null || film.getName().isBlank()) {
-            log.error("Ошибка в названии фильма");
-            throw new ValidationException("Название фильма не может быть пустым!");
-        }
-        if (film.getDescription().length() > 200) {
-            log.error("Ошибка в описании фильма");
-            throw new ValidationException("Максимальная длина описания — 200 символов!");
-        }
-        if (film.getReleaseDate().isBefore(LocalDate.parse("1895-12-28"))) {
-            log.error("Ошибка в дате выхода фильма");
-            throw new ValidationException("Дата релиза не может быть раньше 28 декабря 1895 года!");
-        }
-        if (film.getDuration() <= 0) {
-            log.error("Ошибка в продолжительности фильма");
-            throw new ValidationException("Продолжительность фильма должна быть положительной!");
-        }
         try {
             KeyHolder keyHolder = new GeneratedKeyHolder();
             try {
@@ -144,26 +128,14 @@ public class FilmDbStorage implements FilmStorage {
         if (mayBeFilm.isPresent()) {
             Film oldFilm = mayBeFilm.get();
             if (updatedFilm.getName() != null) {
-                if (updatedFilm.getName().isBlank()) {
-                    log.error("Ошибка в названии при обновлении!");
-                    throw new ValidationException("Название фильма не может быть пустым!");
-                }
                 oldFilm.setName(updatedFilm.getName());
                 log.debug("Название изменено на {}", oldFilm.getName());
             }
             if (updatedFilm.getDescription() != null) {
-                if (updatedFilm.getDescription().length() > 200) {
-                    log.error("Ошибка в описании при обновлении!");
-                    throw new ValidationException("Максимальная длина описания — 200 символов!");
-                }
                 oldFilm.setDescription(updatedFilm.getDescription());
                 log.debug("Описание изменено на {}", oldFilm.getDescription());
             }
             if (updatedFilm.getReleaseDate() != null) {
-                if (updatedFilm.getReleaseDate().isBefore(LocalDate.parse("1895-12-28"))) {
-                    log.error("Ошибка в дате выхода при обновлении!");
-                    throw new ValidationException("Дата релиза не может быть раньше 28 декабря 1895 года!");
-                }
                 oldFilm.setReleaseDate(updatedFilm.getReleaseDate());
                 log.debug("Дата выхода изменена на {}", oldFilm.getReleaseDate());
             }

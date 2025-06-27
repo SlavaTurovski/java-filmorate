@@ -26,10 +26,19 @@ public class UserDbStorage implements UserStorage {
 
     @Autowired
     protected JdbcTemplate jdbc;
-    private static final String FIND_BY_ID_QUERY = "SELECT * FROM users WHERE id = ?";
-    private static final String FIND_ALL_QUERY = "SELECT * FROM users";
-    private static final String INSERT_QUERY = "INSERT INTO users (email, login, name, birthday) VALUES (?, ?, ?, ?)";
-    private static final String UPDATE_QUERY = "UPDATE users SET email = ?, login = ?, name = ?, birthday = ? WHERE id = ?";
+    private static final String FIND_BY_ID_QUERY =
+                    "SELECT * " +
+                    "FROM users " +
+                    "WHERE id = ?";
+    private static final String FIND_ALL_QUERY =
+                    "SELECT * " +
+                    "FROM users";
+    private static final String INSERT_QUERY =
+                    "INSERT INTO users (email, login, name, birthday) " +
+                    "VALUES (?, ?, ?, ?)";
+    private static final String UPDATE_QUERY =
+                    "UPDATE users SET email = ?, login = ?, name = ?, birthday = ? " +
+                    "WHERE id = ?";
 
 
     @Override
@@ -56,15 +65,6 @@ public class UserDbStorage implements UserStorage {
             log.warn("У пользователя с логином [{}] отсутствует имя. Имя присвоено в соответствии с логином!", newUser.getLogin());
             newUser.setName(newUser.getLogin());
         }
-        if (newUser.getEmail() == null || !newUser.getEmail().contains("@")) {
-            throw new ValidationException("Электронная почта не может быть пустой и должна содержать символ @!");
-        }
-        if (newUser.getLogin() == null || newUser.getLogin().contains(" ")) {
-            throw new ValidationException("Логин не может быть пустым и содержать пробелы!");
-        }
-        if (newUser.getBirthday().isAfter(LocalDate.now())) {
-            throw new ValidationException("Дата рождения не может быть в будущем!");
-        }
         try {
             GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
             jdbc.update(connection -> {
@@ -79,7 +79,7 @@ public class UserDbStorage implements UserStorage {
             newUser.setId(userId);
             return newUser;
         } catch (InternalServerException ex) {
-            throw new RuntimeException("Не удалось создать пользователя");
+            throw new RuntimeException("Не удалось создать пользователя!");
         }
     }
 
@@ -87,21 +87,15 @@ public class UserDbStorage implements UserStorage {
     public User updateUser(User user) {
         log.info("Обновление пользователя с id [{}]", user.getId());
         if (user.getId() == null) {
-            throw new ValidationException("Для обновления пользователя необходимо указать id");
+            throw new ValidationException("Для обновления пользователя необходимо указать id!");
         }
         Optional<User> mayBeUser = getUserById(user.getId());
         if (mayBeUser.isPresent()) {
             User oldUser = mayBeUser.get();
             if (user.getEmail() != null) {
-                if (!user.getEmail().contains("@")) {
-                    throw new ValidationException("Электронная почта не может быть пустой и должна содержать символ @");
-                }
                 oldUser.setEmail(user.getEmail());
             }
             if (user.getLogin() != null) {
-                if (user.getLogin().contains(" ")) {
-                    throw new ValidationException("Логин не может быть пустым и содержать пробелы");
-                }
                 oldUser.setLogin(user.getLogin());
             }
             if (user.getName() != null) {
@@ -110,9 +104,6 @@ public class UserDbStorage implements UserStorage {
                 }
             }
             if (user.getBirthday() != null) {
-                if (user.getBirthday().isAfter(LocalDate.now())) {
-                    throw new ValidationException("Дата рождения не может быть в будущем");
-                }
                 oldUser.setBirthday(user.getBirthday());
             }
 
@@ -121,11 +112,11 @@ public class UserDbStorage implements UserStorage {
             log.info("Пользователь с id [{}] обновлен", user.getId());
             log.debug("Пользователь [{}]", user);
             if (rowsUpdated == 0) {
-                throw new InternalServerException("Не удалось обновить данные");
+                throw new InternalServerException("Не удалось обновить данные!");
             }
             return oldUser;
         }
-        throw new NotFoundException("Пользователь с id = " + user.getId() + " не найден");
+        throw new NotFoundException("Пользователь с id = " + user.getId() + " не найден!");
     }
 
 }
