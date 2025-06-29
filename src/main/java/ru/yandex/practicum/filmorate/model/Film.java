@@ -4,12 +4,13 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
+import lombok.Builder;
 import lombok.Data;
 
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.LinkedHashSet;
 
+@Builder
 @Data
 public class Film {
 
@@ -26,8 +27,8 @@ public class Film {
     private LocalDate releaseDate;
 
     @Positive
-    private Long duration;
-
-    private Set<Long> likes = new HashSet<>();
+    private Integer duration;
+    private LinkedHashSet<Genre> genres;
+    private Mpa mpa;
 
 }

@@ -1,2 +1,17 @@
-# java-filmorate
-Template repository for Filmorate project.
+# Filmorate
+Filmorate - учебный проект социальной платформы о кино. Пользователи могут просматривать информацию и фильмах, добавлять других пользователей в друзья и составлять рейтинги фильмов.
+
+## ER-диаграмма
+![ER-диаграмма учебного проекта Filmorate](https://github.com/SlavaTurovski/java-filmorate/blob/add-database/Diagram%20add-database.png)
+
+Ссылка на диаграмму
+https://dbdiagram.io/d/Copy-of-Untitled-Diagram-685bf94cf413ba3508d4fb38
+
+## Структура базы данных проекта
+1. users - таблица пользователей
+2. films - таблица фильмов
+3. genre - таблица жанров
+4. mpa - таблица возрастного рейтинга для фильмов
+5. film_genre - таблица для связи фильмов и жанров
+6. friendship - таблица друзей пользователей
+7. liked_films - таблица с метками "нравится"

@@ -2,67 +2,71 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.filmstorage.FilmStorage;
-
-import java.util.List;
-import java.util.stream.Collectors;
+import ru.yandex.practicum.filmorate.storage.LikeDbStorage;
+import ru.yandex.practicum.filmorate.storage.filmstorage.FilmDbStorage;
+import ru.yandex.practicum.filmorate.storage.userstorage.UserDbStorage;
+import java.util.Collection;
+import java.util.Optional;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class FilmService {
 
-    private final FilmStorage filmStorage;
-    private final UserService userService;
+    private final FilmDbStorage filmStorage;
+    private final UserDbStorage userStorage;
+    private final LikeDbStorage likeStorage;
 
-    public List<Film> getFilms() {
+    public Collection<Film> getFilms() {
+        log.info("Поиск фильмов");
         return filmStorage.getFilms();
     }
 
     public Film getFilmById(Long filmId) {
-        Film film = filmStorage.getFilmById(filmId);
-        if (film == null) {
-            throw new NotFoundException("Фильм с id " + filmId + " не найден!");
-        }
-        return film;
+        log.info("Поиск фильма по id");
+        return filmStorage.getFilmById(filmId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Фильм не найден!"));
     }
 
-    public Film createFilm(Film film) {
-        return filmStorage.createFilm(film);
+    public Film createFilm(Film newFilm) {
+        log.info("Создание фильма");
+        return filmStorage.createFilm(newFilm);
     }
 
-    public Film updateFilm(Film film) {
-        return filmStorage.updateFilm(film);
+    public Film updateFilm(Film updatedFilm) {
+        log.info("Обновление данных фильма");
+        return filmStorage.updateFilm(updatedFilm);
     }
 
     public void addLike(Long filmId, Long userId) {
         log.info("Добавление лайка");
-        Film film = getFilmById(filmId);
-        User user = userService.getUserById(userId);
-        film.getLikes().add(user.getId());
+        Optional<Film> mayBeFilm = filmStorage.getFilmById(filmId);
+        Optional<User> mayBeUser = userStorage.getUserById(userId);
+        if (mayBeFilm.isEmpty() || mayBeUser.isEmpty()) {
+          throw new NotFoundException("Фильм или пользователь не найдены!");
+        }
+        likeStorage.addLike(filmId, userId);
     }
 
     public void removeLike(Long filmId, Long userId) {
         log.info("Удаление лайка");
-        Film film = getFilmById(filmId);
-        if (userService.getUserById(userId) != null) {
-            film.getLikes().remove(userId);
+        Optional<Film> mayBeFilm = filmStorage.getFilmById(filmId);
+        Optional<User> mayBeUser = userStorage.getUserById(userId);
+        if (mayBeFilm.isEmpty() || mayBeUser.isEmpty()) {
+            throw new NotFoundException("Фильм или пользователь не найдены!");
         }
+        likeStorage.removeLike(filmId, userId);
     }
 
-    public List<Film> getMostPopularFilms(Integer count) {
+    public Collection<Film> getMostPopularFilms(Integer count) {
         log.info("Получение списка популярных фильмов");
-        List<Film> films = filmStorage.getFilms();
-        return films.stream()
-                .sorted((film1, film2) ->
-                        Integer.compare((film2.getLikes() != null) ? film2.getLikes().size() : 0,
-                                (film1.getLikes() != null) ? film1.getLikes().size() : 0))
-                .limit(count)
-                .collect(Collectors.toList());
+        return filmStorage.getTopFilms(count);
     }
 
 }

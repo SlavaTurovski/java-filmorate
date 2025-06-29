@@ -1,17 +1,21 @@
 package ru.yandex.practicum.filmorate.storage.userstorage;
 
+import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.util.List;
+import java.util.Collection;
+import java.util.Optional;
 
 public interface UserStorage {
 
-    List<User> getUsers();
+    Collection<User> getUsers();
 
-    User createUser(User newUser);
+    User createUser(User user) throws ValidationException;
 
-    User updateUser(User updatedUser);
+    User updateUser(User user) throws  ValidationException;
 
-    User getUserById(Long userId);
+    boolean existsById(Long userId);
+
+    Optional<User> getUserById(Long userId) throws ValidationException;
 
 }
