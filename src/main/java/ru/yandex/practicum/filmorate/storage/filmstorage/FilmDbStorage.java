@@ -31,36 +31,46 @@ public class FilmDbStorage implements FilmStorage {
     protected JdbcTemplate jdbc;
 
     private static final String FIND_BY_ID_QUERY =
-            "SELECT f.id, f.name, f.description, f.release_date, f.duration, m.mpa_id, m.name AS name_mpa " +
-            "FROM films AS f " +
-            "LEFT JOIN mpa AS m ON f.mpa_id = m.mpa_id " +
-            "WHERE f.id = ? ";
+            """
+            SELECT f.id, f.name, f.description, f.release_date, f.duration, m.mpa_id, m.name AS name_mpa
+            FROM films AS f
+            LEFT JOIN mpa AS m ON f.mpa_id = m.mpa_id
+            WHERE f.id = ?
+            """;
 
     private static final String FIND_ALL_QUERY =
-            "SELECT f.id, f.name, f.description, f.release_date, f.duration, m.mpa_id, m.name AS name_mpa " +
-            "FROM films AS f " +
-            "LEFT JOIN mpa AS m ON f.mpa_id = m.mpa_id ";
+            """
+            SELECT f.id, f.name, f.description, f.release_date, f.duration, m.mpa_id, m.name AS name_mpa
+            FROM films AS f
+            LEFT JOIN mpa AS m ON f.mpa_id = m.mpa_id
+            """;
 
     private static final String INSERT_QUERY =
-            "INSERT " +
-            "INTO films (name, description, release_date, duration, mpa_id) " +
-            "VALUES (?, ?, ?, ?, ?) ";
+            """
+            INSERT
+            INTO films (name, description, release_date, duration, mpa_id)
+            VALUES (?, ?, ?, ?, ?)
+            """;
 
     private static final String UPDATE_QUERY =
-            "UPDATE films " +
-            "SET name = ?, description = ?, release_date = ?, duration = ?, mpa_id = ? " +
-            "WHERE id = ? ";
+            """
+            UPDATE films
+            SET name = ?, description = ?, release_date = ?, duration = ?, mpa_id = ?
+            WHERE id = ?
+            """;
 
     @Override
     public Optional<Film> getFilmById(Long filmId) {
         try {
             Film result = jdbc.queryForObject(FIND_BY_ID_QUERY, new FilmRowMapper(), filmId);
             String genreSql =
-                    "SELECT g.genre_id, g.name " +
-                    "FROM film_genre AS fg " +
-                    "LEFT JOIN films AS f ON f.id = fg.film_id " +
-                    "LEFT JOIN genre AS g ON fg.genre_id = g.genre_id " +
-                    "WHERE f.id = ? ";
+                    """
+                    SELECT g.genre_id, g.name
+                    FROM film_genre AS fg
+                    LEFT JOIN films AS f ON f.id = fg.film_id
+                    LEFT JOIN genre AS g ON fg.genre_id = g.genre_id
+                    WHERE f.id = ?
+                    """;
             List<Genre> genre = jdbc.query(genreSql, new GenreRowMapper(), filmId);
             result.setGenres(new LinkedHashSet<>(genre));
             return Optional.ofNullable(result);
@@ -74,10 +84,12 @@ public class FilmDbStorage implements FilmStorage {
         log.info("Получение списка фильмов");
         List<Film> result = jdbc.query(FIND_ALL_QUERY, new FilmRowMapper());
         String genreSql =
-                "SELECT g.genre_id, g.name " +
-                "FROM film_genre AS fg " +
-                "LEFT JOIN films AS f ON f.id = fg.film_id " +
-                "LEFT JOIN genre AS g ON fg.genre_id = g.genre_id WHERE f.id = ? ";
+                """
+                SELECT g.genre_id, g.name
+                FROM film_genre AS fg
+                LEFT JOIN films AS f ON f.id = fg.film_id
+                LEFT JOIN genre AS g ON fg.genre_id = g.genre_id WHERE f.id = ?
+                """;
         for (Film film : result) {
             long id = film.getId();
             List<Genre> genre = jdbc.query(genreSql, new GenreRowMapper(), id);
@@ -153,8 +165,10 @@ public class FilmDbStorage implements FilmStorage {
                 throw new InternalServerException("Не удалось обновить данные!");
             }
             String sqlQueryForDeleteGenres =
-                            "DELETE FROM film_genre " +
-                            "WHERE FILM_ID = ? ";
+                    """
+                    DELETE FROM film_genre
+                    WHERE FILM_ID = ?
+                    """;
             jdbc.update(sqlQueryForDeleteGenres, oldFilm.getId());
             updateGenres(oldFilm);
             return oldFilm;
@@ -167,9 +181,11 @@ public class FilmDbStorage implements FilmStorage {
         try {
             if (film.getGenres() != null) {
                 String sqlQueryForGenres =
-                                "INSERT " +
-                                "INTO film_genre (FILM_ID, GENRE_ID) " +
-                                "VALUES (?, ?) ";
+                        """
+                        INSERT
+                        INTO film_genre (FILM_ID, GENRE_ID)
+                        VALUES (?, ?)
+                        """;
                 jdbc.batchUpdate(
                         sqlQueryForGenres, film.getGenres(), film.getGenres().size(),
                         (ps, genre) -> {
@@ -185,10 +201,12 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public Collection<Film> getTopFilms(int limit) {
         String sql = FIND_ALL_QUERY +
-                "LEFT JOIN film_likes AS fl ON f.id = fl.film_id " +
-                "GROUP BY f.id, f.name, f.description, f.release_date, f.duration, m.mpa_id, m.name " +
-                "ORDER BY COUNT(fl.film_id) DESC " +
-                "LIMIT ? ";
+                """
+                LEFT JOIN film_likes AS fl ON f.id = fl.film_id
+                GROUP BY f.id, f.name, f.description, f.release_date, f.duration, m.mpa_id, m.name
+                ORDER BY COUNT(fl.film_id) DESC
+                LIMIT ?
+                """;
         return jdbc.query(sql, new FilmRowMapper(), limit);
     }
 

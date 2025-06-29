@@ -25,20 +25,46 @@ public class UserDbStorage implements UserStorage {
 
     @Autowired
     protected JdbcTemplate jdbc;
-    private static final String FIND_BY_ID_QUERY =
-                    "SELECT * " +
-                    "FROM users " +
-                    "WHERE id = ?";
-    private static final String FIND_ALL_QUERY =
-                    "SELECT * " +
-                    "FROM users";
-    private static final String INSERT_QUERY =
-                    "INSERT INTO users (email, login, name, birthday) " +
-                    "VALUES (?, ?, ?, ?)";
-    private static final String UPDATE_QUERY =
-                    "UPDATE users SET email = ?, login = ?, name = ?, birthday = ? " +
-                    "WHERE id = ?";
 
+    private static final String FIND_BY_ID_QUERY =
+            """
+            SELECT *
+            FROM users
+            WHERE id = ?
+            """;
+
+    private static final String FIND_ALL_QUERY =
+            """
+            SELECT *
+            FROM users
+            """;
+
+    private static final String INSERT_QUERY =
+            """
+            INSERT INTO users (email, login, name, birthday)
+            VALUES (?, ?, ?, ?)
+            """;
+
+    private static final String UPDATE_QUERY =
+            """
+            UPDATE users SET email = ?, login = ?, name = ?, birthday = ?
+            WHERE id = ?
+            """;
+
+    private static final String EXISTS_QUERY =
+            """
+            SELECT EXISTS(
+                SELECT 1
+                FROM users
+                WHERE id = ?
+                )
+            """;
+
+    @Override
+    public boolean existsById(Long userId) {
+        Boolean exists = jdbc.queryForObject(EXISTS_QUERY, Boolean.class, userId);
+        return exists != null && exists;
+    }
 
     @Override
     public Optional<User> getUserById(Long userId) throws ValidationException {

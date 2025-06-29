@@ -43,9 +43,9 @@ public class UserService {
 
     public void addFriend(Long id, Long friendId) {
         log.info("Добавление в друзья");
-        Optional<User> mayBeUser = userStorage.getUserById(id);
-        Optional<User> mayBeFriend = userStorage.getUserById(friendId);
-        if (mayBeUser.isEmpty() || mayBeFriend.isEmpty()) {
+        boolean isUserExists = userStorage.existsById(id);
+        boolean isFriendExists = userStorage.existsById(friendId);
+        if (!isUserExists || !isFriendExists) {
             throw new NotFoundException("Пользователь не найден!");
         }
         friendStorage.addFriends(id, friendId);
@@ -53,9 +53,9 @@ public class UserService {
 
     public void removeFriend(Long id, Long friendId) {
         log.info("Удаление из друзей");
-        Optional<User> mayBeUser = userStorage.getUserById(id);
-        Optional<User> mayBeFriend = userStorage.getUserById(friendId);
-        if (mayBeUser.isEmpty() || mayBeFriend.isEmpty()) {
+        boolean isUserExists = userStorage.existsById(id);
+        boolean isFriendExists = userStorage.existsById(friendId);
+        if (!isUserExists || !isFriendExists) {
             throw new NotFoundException("Пользователь не найден!");
         }
         friendStorage.removeFriends(id, friendId);
@@ -63,9 +63,9 @@ public class UserService {
 
     public Collection<User> getMutualFriendsList(Long id, Long otherId) {
         log.info("Получение списка общих друзей");
-        Optional<User> mayBeUser = userStorage.getUserById(id);
-        Optional<User> mayBeOtherUser = userStorage.getUserById(otherId);
-        if (mayBeUser.isEmpty() || mayBeOtherUser.isEmpty()) {
+        boolean isUserExists = userStorage.existsById(id);
+        boolean isFriendExists = userStorage.existsById(otherId);
+        if (!isUserExists || !isFriendExists) {
             throw new NotFoundException("Пользователь не найден!");
         }
         return friendStorage.getCommonFriends(id, otherId);
@@ -73,8 +73,8 @@ public class UserService {
 
     public Collection<User> getFriends(Long id) {
         log.info("Получение списка друзей");
-        Optional<User> mayBeUser = userStorage.getUserById(id);
-        if (mayBeUser.isEmpty()) {
+        boolean isUserExists = userStorage.existsById(id);
+        if (!isUserExists) {
             throw new NotFoundException("Пользователь не найден!");
         }
         return friendStorage.getFriends(id);

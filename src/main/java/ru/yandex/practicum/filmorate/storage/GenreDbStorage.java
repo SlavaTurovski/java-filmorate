@@ -20,17 +20,21 @@ public class GenreDbStorage {
 
     public Collection<Genre> getGenres() {
         String query =
-                "SELECT * " +
-                "FROM genre;";
+                """
+                SELECT *
+                FROM genre
+                """;
         return jdbc.query(query, new GenreRowMapper());
     }
 
     public Optional<Genre> getGenreById(Long id) {
         try {
             String query =
-                    "SELECT * " +
-                    "FROM genre " +
-                    "WHERE genre_id = ? ";
+                """
+                SELECT *
+                FROM genre
+                WHERE genre_id = ?
+                """;
             return Optional.ofNullable(jdbc.queryForObject(query, new GenreRowMapper(), id));
         } catch (EmptyResultDataAccessException ignored) {
             return Optional.empty();
@@ -39,12 +43,13 @@ public class GenreDbStorage {
 
     public Collection<Genre> getFilmGenres(Long filmId) {
         String query =
-                "SELECT * " +
-                "FROM genre " +
-                "WHERE genres_id IN (" +
-                    "SELECT genre_id " +
-                    "FROM film_genre WHERE = ?" +
-                ") ";
+                """
+                SELECT *
+                FROM genre
+                WHERE genres_id IN (
+                    SELECT genre_id
+                    FROM film_genre WHERE = ? )
+                """;
         return jdbc.query(query, new GenreRowMapper(), filmId);
     }
 

@@ -14,17 +14,21 @@ public class LikeDbStorage {
 
     public void addLike(long filmId, long userId) {
         String sql =
-                "INSERT " +
-                "INTO film_likes (film_id, user_id) " +
-                "VALUES (?, ?) ";
+                """
+                INSERT
+                INTO film_likes (film_id, user_id)
+                VALUES (?, ?)
+                """;
         jdbc.update(sql, filmId, userId);
     }
 
     public void removeLike(Long filmId, Long userId) {
         String sql =
-                "DELETE " +
-                "FROM film_likes " +
-                "WHERE film_id = ? AND user_id = ? ";
+                """
+                DELETE
+                FROM film_likes
+                WHERE film_id = ? AND user_id = ?
+                """;
         jdbc.update(sql, filmId, userId);
     }
 }

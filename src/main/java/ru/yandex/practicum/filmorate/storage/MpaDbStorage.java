@@ -21,9 +21,12 @@ public class MpaDbStorage {
     public Optional<Mpa> getMpaById(Long id) {
         try {
             String sqlQuery =
-                    "SELECT * " +
-                    "FROM mpa " +
-                    "WHERE mpa_id = ? ";
+                    """
+                    SELECT *
+                    FROM mpa
+                    WHERE mpa_id = ?
+                    """;
+
             return Optional.ofNullable(jdbc.queryForObject(sqlQuery, new MpaRowMapper(), id));
         } catch (EmptyResultDataAccessException ignored) {
             return Optional.empty();
@@ -32,8 +35,10 @@ public class MpaDbStorage {
 
     public Collection<Mpa> getAllMpa() {
         String sqlQuery =
-                "SELECT * " +
-                "FROM mpa ";
+                """
+                SELECT *
+                FROM mpa
+                """;
         return jdbc.query(sqlQuery, new MpaRowMapper());
     }
 
